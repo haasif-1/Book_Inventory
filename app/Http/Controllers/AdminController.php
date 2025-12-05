@@ -26,4 +26,38 @@ class AdminController extends Controller
 
         return view('backend.admin.lowstock', compact('products','threshold'));
     }
+
+  public function productsPage()
+{
+    return view('backend.admin.products');
+}
+
+public function productsData(Request $request)
+{
+    $search = $request->search;
+
+    $query = Product::query();
+
+    if ($search) {
+        $query->where(function ($q) use ($search) {
+            $q->where('title', 'like', "%$search%")
+              ->orWhere('sku', 'like', "%$search%")
+              ->orWhere('location', 'like', "%$search%");
+        });
+    }
+
+    // max 10 rows
+    $products = $query->orderBy('id', 'desc')->paginate(10);
+
+    return response()->json([
+        'success' => true,
+        'data' => $products->items(),
+        'pagination' => [
+            'current' => $products->currentPage(),
+            'last' => $products->lastPage(),
+        ]
+    ]);
+}
+
+
 }

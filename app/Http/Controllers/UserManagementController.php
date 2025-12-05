@@ -11,9 +11,14 @@ class UserManagementController extends Controller
 {
     public function index()
     {
-        $users = User::with('roles')->get();
+        $users = User::whereHas('roles', function ($q) {
+            $q->whereIn('name', ['admin', 'clerk']);
+        })->with('roles')->get();
+
         return view('backend.admin.users.index', compact('users'));
     }
+
+
 
     public function create()
     {
@@ -67,20 +72,19 @@ class UserManagementController extends Controller
     }
 
     public function destroy(User $user)
-{
-    // Prevent admin from deleting his own account
-    if (auth()->id() === $user->id) {
-        return redirect()->route('users.index')
-            ->with('error', 'You cannot delete your own account.');
+    {
+        // Prevent admin from deleting his own account
+        if (auth()->id() === $user->id) {
+            return redirect()->route('users.index')
+                ->with('error', 'You cannot delete your own account.');
+        }
+
+        // Remove assigned roles (Spatie)
+        $user->syncRoles([]);
+
+        // Delete the user
+        $user->delete();
+
+        return redirect()->route('users.index')->with('success', 'User deleted successfully');
     }
-
-    // Remove assigned roles (Spatie)
-    $user->syncRoles([]);
-
-    // Delete the user
-    $user->delete();
-
-    return redirect()->route('users.index')->with('success', 'User deleted successfully');
-}
-
 }

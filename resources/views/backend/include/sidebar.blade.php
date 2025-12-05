@@ -59,13 +59,23 @@
                         </a>
                     </li>
 
-                    <!-- Orders (Just Placeholder Now) -->
+                    <!-- Products -->
                     <li class="sidebar-item">
-                        <a class="sidebar-link" href="javascript:void(0)">
-                            <i class="ti ti-shopping-cart"></i>
-                            <span class="hide-menu">Orders (coming soon)</span>
+                        <a class="sidebar-link" href="{{ route('admin.products') }}">
+                            <i class="ti ti-box"></i>
+                            <span class="hide-menu">Products</span>
                         </a>
                     </li>
+
+
+                    <!-- Orders (Just Placeholder Now) -->
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="{{ route('admin.orders') }}">
+                            <i class="ti ti-file-invoice"></i>
+                            <span class="hide-menu">Manage Orders</span>
+                        </a>
+                    </li>
+
 
                     <!-- Administration -->
                     <li class="sidebar-item">
@@ -75,6 +85,32 @@
                         </a>
                     </li>
 
+                @endif
+
+                @if ($u && $u->hasRole('client'))
+                    <li class="sidebar-item">
+                        <a class="sidebar-link" href="{{ route('client.dashboard') }}">
+                            <i class="ti ti-home"></i>
+                            <span class="hide-menu">Dashboard</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item d-flex justify-content-between align-items-center">
+                        <a class="sidebar-link" href="{{ route('client.orders') }}">
+                            <i class="ti ti-file-invoice"></i>
+                            <span class="hide-menu">My Orders</span>
+                        </a>
+                    </li>
+
+
+                    <li class="sidebar-item d-flex align-items-center justify-content-between">
+                        <a class="sidebar-link" href="{{ route('cart.view') }}">
+                            <i class="ti ti-shopping-cart"></i>
+                            <span class="hide-menu">My Cart</span>
+                        </a>
+
+                        <span id="cartCount" class="badge bg-primary">0</span>
+                    </li>
                 @endif
 
 
@@ -106,3 +142,20 @@
         margin-top: 26px;
     }
 </style>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+
+        function updateCartCount() {
+            fetch(`{{ route('cart.count') }}`)
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById('cartCount').textContent = data.count;
+                });
+        }
+
+        updateCartCount(); // load on page start
+
+        // Call again after every 5 seconds (live updates)
+        setInterval(updateCartCount, 5000);
+    });
+</script>
